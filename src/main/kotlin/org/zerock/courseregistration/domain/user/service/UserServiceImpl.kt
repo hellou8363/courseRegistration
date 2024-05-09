@@ -1,25 +1,51 @@
 package org.zerock.courseregistration.domain.user.service
 
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.zerock.courseregistration.domain.exception.ModelNotFoundException
 import org.zerock.courseregistration.domain.user.dto.SignUpRequest
 import org.zerock.courseregistration.domain.user.dto.UpdateUserProfileRequest
 import org.zerock.courseregistration.domain.user.dto.UserResponse
+import org.zerock.courseregistration.domain.user.model.Profile
+import org.zerock.courseregistration.domain.user.model.User
+import org.zerock.courseregistration.domain.user.model.UserRole
+import org.zerock.courseregistration.domain.user.model.toResponse
+import org.zerock.courseregistration.domain.user.repository.UserRepository
 
 @Service
-class UserServiceImpl : UserService {
+class UserServiceImpl(private val userRepository: UserRepository) : UserService {
 
     @Transactional
     override fun signUp(request: SignUpRequest): UserResponse {
-        // TODO : Email이 중복되는지 확인, 중복된다면 throw IllegalStateException
-        // TODO : request를 User로 변환 후 DB에 저장, 비밀번호는 저장시 암호화
-        TODO("Not yet implemented")
+        if (userRepository.existsByEmail(request.email)) {
+            throw IllegalStateException("Email is already in use")
+        }
+
+        return userRepository.save(
+            User(
+                email = request.email,
+                // TODO : 비밀번호 암호화
+                password = request.password,
+                profile = Profile(
+                    nickname = request.nickname
+                ),
+                role = when (request.role) {
+                    UserRole.STUDENT.name -> UserRole.STUDENT
+                    UserRole.TUTOR.name -> UserRole.TUTOR
+                    else -> throw IllegalStateException("Invalid role")
+                }
+            )
+        ).toResponse()
     }
 
     @Transactional
     override fun updateUserProfile(userId: Long, request: UpdateUserProfileRequest): UserResponse {
-        // TODO : userId에 해당하는 User가 없다면 throw ModelNotFoundException
-        // TODO : DB에서 userId에 해당하는 User를 가져와서 updateUserProfile로 업데이트 후 DB에 저장, 결과를 UserResponse로 변환 후 반환
-        TODO("Not yet implemented")
+        val user = userRepository.findByIdOrNull(userId) ?: throw ModelNotFoundException("User", userId)
+        user.profile = Profile(
+            nickname = request.nickname
+        )
+
+        return userRepository.save(user).toResponse()
     }
 }
