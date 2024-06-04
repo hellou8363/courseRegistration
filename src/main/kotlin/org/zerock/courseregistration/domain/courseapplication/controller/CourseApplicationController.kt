@@ -17,7 +17,7 @@ class CourseApplicationController(
     @PostMapping
     fun applyCourse(
         @PathVariable courseId: Long,
-        applyCourseRequest: ApplyCourseRequest
+        @RequestBody applyCourseRequest: ApplyCourseRequest
     ): ResponseEntity<CourseApplicationResponse> {
         return ResponseEntity.status(HttpStatus.OK).body(courseService.applyCourse(courseId, applyCourseRequest))
     }

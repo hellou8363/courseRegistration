@@ -39,6 +39,7 @@ class CourseController(
 
     @DeleteMapping("/{courseId}")
     fun deleteCourse(@PathVariable courseId: Long): ResponseEntity<Unit> {
+        courseService.deleteCourse(courseId)
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
     }
 }

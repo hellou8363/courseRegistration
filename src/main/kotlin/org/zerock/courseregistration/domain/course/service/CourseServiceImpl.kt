@@ -95,10 +95,10 @@ class CourseServiceImpl(
 
         // Course에 Lecture 추가
         course.addLecture(lecture)
+        lectureRepository.save(lecture)
+
         // Lecture에 영속성을 전파
         courseRepository.save(course)
-        // TODO : TEST CODE - 아래 코드를 넣지 않으면 null 문제 발생
-//        lectureRepository.save(lecture)
 
         return lecture.toResponse()
     }
@@ -151,9 +151,9 @@ class CourseServiceImpl(
 
         course.addCourseApplication(courseApplication)
 
+        courseApplicationRepository.save(courseApplication)
         // CourseApplication에 영속성을 전파
         courseRepository.save(course)
-        // TODO :
 
         return courseApplication.toResponse()
     }
